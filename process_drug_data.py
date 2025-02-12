@@ -20,6 +20,7 @@ LAST_PARSED_PDF_PATH = "output/last_parsed_pdf_path.txt"
 LOG_PATH = "output/process_drug_data.log"
 CRITERIA_MINIMUM_WORD_COUNT = 15
 
+# Configure the logger.
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename=LOG_PATH, encoding="utf-8", level=logging.DEBUG)
 
@@ -66,7 +67,6 @@ def load_string(path):
 
 def json_dump_to_file(object, path):
     """Dump an object as JSON into a file at the provided path. Logs errors.
-
     :param object: The object to dump.
     :param path: The path of the file to dump into.
     """
@@ -97,7 +97,6 @@ def count_words(string):
 
 def extract_text_from_pdf(pdf_path):
     """Parse the text of a PDF and return that text as a string.
-
     :param pdf_path: The path of the PDF to parse.
     :return: The text of the PDF.
     """
@@ -302,20 +301,41 @@ def extract_drug_criteria_from_pdf_to_database(pdf_path,
 
 
 def extract_text_from_pdf_as_single_step(input_pdf_path, output_txt_path=DEFAULT_TXT_OUTPUT_PATH):
+    """Extract the text from a PDF, save the intermediate output, and stop.
+    :param input_pdf_path: Location of the PDF file to read from.
+    :param output_txt_path: Location to save the parsed text to.
+    """
+    # Extract the text from the PDF
     text = extract_text_from_pdf(input_pdf_path)
+    # Save the string to a file.
     save_string_to_file(text, output_txt_path)
 
 
 def summarize_drug_info_as_single_step(input_txt_path=DEFAULT_TXT_OUTPUT_PATH, drug_info_output_path=DEFAULT_DRUG_INFO_OUTPUT_PATH):
+    """Summarize drug information described in a text file, save the intermediate output, and stop.
+    :param input_txt_path: Location of the text file to read from.
+    :param drug_info_output_path: Location to save the drug information output object to.
+    """
+    # Load the string from a file.
     text = load_string(input_txt_path)
+    # Load the source url of the last parsed PDF.
     text_source = load_string(LAST_PARSED_PDF_PATH)
+    # Summarize the drug information into a structured format using AI.
     drug_info = summarize_drug_info(text, text_source)
+    # Dump the drug information dict to a file.
     json_dump_to_file(drug_info, drug_info_output_path)
 
 
 def add_drug_info_to_database_as_single_step(input_drug_info_path=DEFAULT_DRUG_INFO_OUTPUT_PATH, output_database_path=DEFAULT_DATABASE_PATH):
+    """Populate a database with data from a saved drug information object.
+    :param input_drug_info_path: Location of the file containing the drug info object.
+    :param output_database_path: Location of the database to populate.
+    """
+    # Load the drug information dict from a file.
     drug_info = load_json(input_drug_info_path)
+    # Make sure the data looks right.
     validate_drug_info(drug_info)
+    # Populate the database with the information.
     add_drug_info_to_database(drug_info, output_database_path)
 
 
@@ -357,9 +377,11 @@ if __name__ == "__main__":
                 print(error_message)
                 exit(1)
             else:
+                # Parse the text.
                 extract_text_from_pdf_as_single_step(args.path)
 
         elif args.step == "summarize-info":
+            # Determine whether to use a default path or a provided one.
             if not args.path:
                 message = "No filepath was provided. Script will proceed using default path."
                 logger.info(message)
@@ -368,10 +390,11 @@ if __name__ == "__main__":
             else:
                 path = args.path
 
-            #
+            # Summarize the drug information.
             summarize_drug_info_as_single_step(path)
 
         elif args.step == "populate-database":
+            # Determine whether to use a default path or a provided one.
             if not args.path:
                 message = "No filepath was provided. Script will proceed using default path."
                 logger.info(message)
@@ -380,4 +403,5 @@ if __name__ == "__main__":
             else:
                 path = args.path
 
+            # Populate the database.
             add_drug_info_to_database_as_single_step(path)

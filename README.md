@@ -22,6 +22,8 @@ To set up this module, you must have Python and pip installed on your machine. D
     ```
     .\.venv\Scripts\activate.bat
     ```
+    Note: Before using this module in a new terminal instance, you will have to run the above command again.
+
 5. Install needed python packages with the following command in the terminal.
     ```
     pip install -r ./requirements.txt
@@ -76,3 +78,12 @@ python process_drug_data.py --step populate-database
 
 Note the lack of path specification in the commands for the last two steps. These steps will automatically use the default output locations of prior steps for their input.
 
+Logs are saved in `output/process_drug_data.log`.
+
+## Unit tests
+
+To run unit tests from the command line, change directory to `<repo-root>/tests` and run:
+
+```
+python test_process_drug_data.py
+```
