@@ -78,7 +78,7 @@ python process_drug_data.py --step populate-database
 
 Note the lack of path specification in the commands for the last two steps. These steps will automatically use the default output locations of prior steps for their input.
 
-Logs are saved in `output/process_drug_data.log`.
+Logs are saved in `output/process_drug_data.log`. New log entries are appended to the the existing log file. If you want to start a new log file from scratch, simply move or delete the existing one. A new log file will be created automatically the next time a log entry is made.
 
 ## Unit tests
 
